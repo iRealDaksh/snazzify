@@ -4,20 +4,20 @@ import { ShopContext } from '../context/ShopContext';
 import { Link } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 
-const Login = () => {
+const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login, googleSignIn } = useContext(ShopContext);
+    const { signup, googleSignIn } = useContext(ShopContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await login(email, password);
+        await signup(email, password);
     };
 
     return (
         <div className="min-h-screen pb-6">
             <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+                <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -46,7 +46,7 @@ const Login = () => {
                         type="submit"
                         className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
                     >
-                        Login
+                        Sign Up
                     </button>
                 </form>
 
@@ -61,9 +61,9 @@ const Login = () => {
                 </div>
 
                 <p className="mt-4 text-center text-sm text-gray-600">
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="text-blue-500 hover:text-blue-600">
-                        Sign up
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-blue-500 hover:text-blue-600">
+                        Login
                     </Link>
                 </p>
             </div>
@@ -71,4 +71,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Signup; 

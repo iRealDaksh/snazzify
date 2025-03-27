@@ -2,6 +2,15 @@ import { createContext, useEffect, useState } from "react";
 import { products } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { auth } from '../config/firebase';
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword,
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
+} from 'firebase/auth';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 export const ShopContext = createContext();
 
@@ -13,6 +22,65 @@ const ShopContextProvider = (props) => {
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [cardVerifying, setCardVerifying] = useState(false);
+
+    useEffect(() => {
+        const loginStatus = localStorage.getItem('isLoggedIn');
+        if (loginStatus === 'true') {
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    const login = async (email, password) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            setIsLoggedIn(true);
+            localStorage.setItem('isLoggedIn', 'true');
+            toast.success('Logged in successfully!');
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const signup = async (email, password) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            setIsLoggedIn(true);
+            localStorage.setItem('isLoggedIn', 'true');
+            toast.success('Account created successfully!');
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const googleSignIn = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+            setIsLoggedIn(true);
+            localStorage.setItem('isLoggedIn', 'true');
+            toast.success('Logged in with Google successfully!');
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await signOut(auth);
+            setIsLoggedIn(false);
+            localStorage.removeItem('isLoggedIn');
+            clearCart();
+            toast.success('Logged out successfully!');
+            navigate('/');
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     const addToCart = async (itemId, size) => {
 
@@ -78,6 +146,31 @@ const ShopContextProvider = (props) => {
         return totalAmount;
     }
 
+    const clearCart = () => {
+        setCartItems({});
+    };
+
+    const verifyCard = async (cardDetails) => {
+        try {
+            setCardVerifying(true);
+            const db = getFirestore();
+            
+            await addDoc(collection(db, 'payment_verifications'), {
+                userId: auth.currentUser?.uid,
+                timestamp: new Date(),
+                last4: cardDetails.number.slice(-4),
+                success: true
+            });
+
+            return true;
+        } catch (error) {
+            toast.error('Card verification failed');
+            return false;
+        } finally {
+            setCardVerifying(false);
+        }
+    };
+
     const value = {
         currency, delivery_fee,
         products,
@@ -86,8 +179,15 @@ const ShopContextProvider = (props) => {
         showSearch, setShowSearch,
         addToCart, updateQuantity,
         cartItems,
-        getCartCount, getCartAmount
-
+        getCartCount, getCartAmount,
+        clearCart,
+        isLoggedIn,
+        login,
+        signup,
+        googleSignIn,
+        logout,
+        verifyCard,
+        cardVerifying
     }
 
     return (

@@ -1,0 +1,46 @@
+.navbar-button {
+  padding: 10px 20px; /* Add padding to match other buttons */
+  background-color: #0072ff; /* Match the background color */
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor */
+  transition: background-color 0.3s; /* Transition for hover effect */
+}
+
+.navbar-button:hover {
+  background-color: #005bb5; /* Darker shade on hover */
+}
+
+.nav-link {
+    @apply py-2 px-4 rounded-lg transition-colors duration-300 hover:bg-gray-200 focus:bg-gray-300 focus:outline-none;
+}
+
+.sidebar-link {
+    @apply flex items-center gap-2 p-3 rounded-lg hover:bg-gray-100 transition-all;
+}
+
+/* Floating Cart Button Animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.float-cart {
+    animation: float 3s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+    color: white;
+    padding: 1rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.float-cart:hover {
+    transform: scale(1.05);
+    background-color: #333;
+} 

@@ -1,74 +1,150 @@
-import React, { useContext, useState } from 'react'
-import { assets } from '../assets/assets'
-import { Link, NavLink } from 'react-router-dom'
-import { ShopContext } from '../context/ShopContext'
+import React, { useContext, useState, useEffect } from 'react';
+import { assets } from '../assets/assets';
+import { Link, NavLink } from 'react-router-dom';
+import { ShopContext } from '../context/ShopContext';
+import './Navbar.css';
+import { FaBars, FaTimes, FaWallet, FaUser, FaShoppingBag, FaBitcoin, FaEthereum } from 'react-icons/fa';
+import { BiLogOut, BiLogIn } from 'react-icons/bi';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
-
-    const [visible, setVisble] = useState(false)
-
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const { setShowSearch, navigate, getCartCount } = useContext(ShopContext);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    // Add this function to handle login
+    const handleLogin = () => {
+        setIsLoggedIn(true);
+        localStorage.setItem('isLoggedIn', 'true');
+        navigate('/');
+        toast.success('Logged in successfully!');
+    };
+
+    // Add this function to handle logout
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        localStorage.removeItem('isLoggedIn');
+        navigate('/');
+        toast.success('Logged out successfully!');
+    };
+
+    // Check login status on component mount
+    useEffect(() => {
+        const loginStatus = localStorage.getItem('isLoggedIn');
+        if (loginStatus === 'true') {
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
+    };
 
     return (
-        <div className='flex items-center justify-between py-5 font-medium' >
-
-            <Link to='/'><img className='w-36' src={assets.logo} alt="" /></Link>
-
-            <ul className='hidden sm:flex gap-5 text-sm text-gray-700'>
-                <NavLink to="/" className='flex flex-col items-center gap-1'>
-                    <p>HOME</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
-                <NavLink to='/collection' className='flex flex-col items-center gap-1'>
-                    <p>COLLECTION</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
-                <NavLink to='/about' className='flex flex-col items-center gap-1'>
-                    <p>ABOUT</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
-                <NavLink to='/contact' className='flex flex-col items-center gap-1'>
-                    <p>CONTACT</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
-            </ul>
-
-            <div className='flex items-center gap-6'>
-                <img onClick={() => { setShowSearch(true); navigate('/collection') }} className='w-5 cursor-pointer' src={assets.search_icon} alt="" />
-                <div className='group relative'>
-                    <img onClick={() => { navigate('/login') }} className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
-
-                    {/* Dropdown Menu */}
-                    <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
-                        <div className='flex flex-col gap-2 w-36 py-3 px-5  bg-slate-100 text-gray-500 rounded'>
-                            <p onClick={() => { }} className='cursor-pointer hover:text-black'>My Profile</p>
-                            <p onClick={() => navigate('/orders')} className='cursor-pointer hover:text-black'>Orders</p>
-                            <p onClick={() => { }} className='cursor-pointer hover:text-black'>Logout</p>
-                        </div>
-                    </div>
+        <>
+            {/* Fixed navbar */}
+            <div className='fixed top-0 left-0 right-0 z-50 flex items-center justify-between py-1 px-4 bg-white text-black shadow-md'>
+                <div className='flex items-center gap-4'>
+                    <button onClick={toggleSidebar} className='text-2xl'>
+                        <FaBars />
+                    </button>
+                    <Link to='/' className='flex items-center'>
+                        <img 
+                            src={assets.logo} 
+                            alt="Snazzify" 
+                            className="h-[50px] w-[70px] "
+                        />
+                    </Link>
                 </div>
-                <Link to='/cart' className='relative'>
-                    <img className='w-5 min-w-5' src={assets.cart_icon} alt="" />
-                    <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>
+
+                <ul className='hidden sm:flex gap-5 text-sm'>
+                    <NavLink to="/" className='nav-link'>HOME</NavLink>
+                    <NavLink to='/collection' className='nav-link'>COLLECTION</NavLink>
+                    <NavLink to='/about' className='nav-link'>ABOUT</NavLink>
+                    <NavLink to='/contact' className='nav-link'>CONTACT</NavLink>
+                </ul>
+            </div>
+
+            {/* Add a spacer div to prevent content overlap */}
+            <div className="h-[60px]"></div>
+
+            {/* Floating Cart Button - adjust z-index to be below navbar */}
+            <div className='fixed bottom-4 left-4 z-40'>
+                <Link to='/cart' className='float-cart flex items-center gap-2 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-all'>
+                    Cart ({getCartCount()})
                 </Link>
-                <img onClick={() => setVisble(true)} className='w-5 cursor-pointer sm:hidden' src={assets.menu_icon} alt="" />
             </div>
 
-            {/* Sidebar Menu For Small Screens */}
-            <div className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all ${visible ? 'w-full' : 'w-0'}`} >
-                <div className='flex flex-col text-gray-600'>
-                    <div onClick={() => setVisble(false)} className='flex items-center gap-4 p-3 '>
-                        <img className='h-4 rotate-180' src={assets.dropdown_icon} alt="" />
-                        <p>Back</p>
+            {/* Sidebar */}
+            <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className='p-4'>
+                    <div className='flex justify-between items-center mb-8'>
+                        <h2 className='text-xl font-bold'>Menu</h2>
+                        <button onClick={toggleSidebar} className='text-2xl'>
+                            <FaTimes />
+                        </button>
                     </div>
-                    <NavLink onClick={() => setVisble(false)} to="/" className='py-2 pl-6 border'>HOME</NavLink>
-                    <NavLink onClick={() => setVisble(false)} to='/collection' className='py-2 pl-6 border'>COLLECTION</NavLink>
-                    <NavLink onClick={() => setVisble(false)} to='/about' className='py-2 pl-6 border'>ABOUT</NavLink>
-                    <NavLink onClick={() => setVisble(false)} to='/contact' className='py-2 pl-6 border'>CONTACT</NavLink>
+
+                    <div className='flex flex-col gap-4'>
+                        {isLoggedIn ? (
+                            <>
+                                <Link to="/account" className='sidebar-link'>
+                                    <FaUser /> Account
+                                </Link>
+                                <Link to="/wallet" className='sidebar-link'>
+                                    <FaWallet /> Wallet
+                                </Link>
+                                <Link to="/orders" className='sidebar-link'>
+                                    <FaShoppingBag /> Orders
+                                </Link>
+                                
+                                {/* Crypto Payment Options */}
+                                <div className='mt-4 border-t pt-4'>
+                                    <h3 className='text-sm font-semibold mb-2'>Payment Methods</h3>
+                                    <div className='flex flex-col gap-2 text-sm'>
+                                        <div className='flex items-center gap-2'>
+                                            <FaBitcoin className='text-orange-500' /> Bitcoin
+                                        </div>
+                                        <div className='flex items-center gap-2'>
+                                            <FaEthereum className='text-blue-500' /> Ethereum
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={handleLogout}
+                                    className='mt-auto flex items-center gap-2 text-red-500 hover:text-red-600'
+                                >
+                                    <BiLogOut /> Logout
+                                </button>
+                            </>
+                        ) : (
+                            <div className='flex flex-col gap-2'>
+                                <button 
+                                    onClick={handleLogin}
+                                    className='sidebar-link bg-blue-500 text-white hover:bg-blue-600'
+                                >
+                                    <BiLogIn /> Login
+                                </button>
+                                <Link to="/signup" className='sidebar-link border border-blue-500 text-blue-500 hover:bg-blue-50'>
+                                    Sign Up
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-    )
-}
 
-export default Navbar
+            {/* Overlay */}
+            {sidebarOpen && (
+                <div 
+                    className='fixed inset-0 bg-black bg-opacity-50 z-40'
+                    onClick={toggleSidebar}
+                />
+            )}
+        </>
+    );
+};
+
+export default Navbar;
+
