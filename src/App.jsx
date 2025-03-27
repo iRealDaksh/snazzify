@@ -16,6 +16,9 @@ import Wallet from './pages/Wallet'
 import Signup from './pages/Signup'
 import OrderConfirmation from './pages/OrderConfirmation'
 import Account from './pages/Account'
+import Feedback from './pages/Feedback'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
   return (
@@ -37,9 +40,11 @@ const App = () => {
           <Route path='/signup' element={<Signup />} />
           <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
           <Route path='/account' element={<Account />} />
+          <Route path='/feedback' element={<Feedback />} />
         </Routes>
       </main>
       <Footer />
+      <ToastContainer />
     </div>
   )
 }

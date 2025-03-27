@@ -23,19 +23,30 @@ const ShopContextProvider = (props) => {
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
     const [cardVerifying, setCardVerifying] = useState(false);
 
     useEffect(() => {
-        const loginStatus = localStorage.getItem('isLoggedIn');
-        if (loginStatus === 'true') {
-            setIsLoggedIn(true);
-        }
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setIsLoggedIn(true);
+                setUser(user);
+                localStorage.setItem('isLoggedIn', 'true');
+            } else {
+                setIsLoggedIn(false);
+                setUser(null);
+                localStorage.removeItem('isLoggedIn');
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const login = async (email, password) => {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             setIsLoggedIn(true);
+            setUser(userCredential.user);
             localStorage.setItem('isLoggedIn', 'true');
             toast.success('Logged in successfully!');
             navigate('/');
@@ -73,8 +84,9 @@ const ShopContextProvider = (props) => {
         try {
             await signOut(auth);
             setIsLoggedIn(false);
+            setUser(null);
             localStorage.removeItem('isLoggedIn');
-            clearCart();
+            localStorage.removeItem('user');
             toast.success('Logged out successfully!');
             navigate('/');
         } catch (error) {
@@ -182,6 +194,7 @@ const ShopContextProvider = (props) => {
         getCartCount, getCartAmount,
         clearCart,
         isLoggedIn,
+        user,
         login,
         signup,
         googleSignIn,

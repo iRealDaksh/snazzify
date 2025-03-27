@@ -3,38 +3,22 @@ import { assets } from '../assets/assets';
 import { Link, NavLink } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import './Navbar.css';
-import { FaBars, FaTimes, FaWallet, FaUser, FaShoppingBag, FaBitcoin, FaEthereum } from 'react-icons/fa';
+import { FaBars, FaTimes, FaWallet, FaUser, FaShoppingBag, FaBitcoin, FaEthereum, FaComment } from 'react-icons/fa';
 import { BiLogOut, BiLogIn } from 'react-icons/bi';
 import { toast } from 'react-toastify';
 
 const Navbar = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { setShowSearch, navigate, getCartCount } = useContext(ShopContext);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { setShowSearch, navigate, getCartCount, isLoggedIn, logout } = useContext(ShopContext);
 
-    // Add this function to handle login
-    const handleLogin = () => {
-        setIsLoggedIn(true);
-        localStorage.setItem('isLoggedIn', 'true');
-        navigate('/');
-        toast.success('Logged in successfully!');
+    const handleLoginClick = () => {
+        navigate('/login');
     };
 
-    // Add this function to handle logout
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-        localStorage.removeItem('isLoggedIn');
-        navigate('/');
-        toast.success('Logged out successfully!');
+    const handleLogoutClick = async () => {
+        await logout();
+        setSidebarOpen(false); // Close sidebar after logout
     };
-
-    // Check login status on component mount
-    useEffect(() => {
-        const loginStatus = localStorage.getItem('isLoggedIn');
-        if (loginStatus === 'true') {
-            setIsLoggedIn(true);
-        }
-    }, []);
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
@@ -87,41 +71,32 @@ const Navbar = () => {
 
                     <div className='flex flex-col gap-4'>
                         {isLoggedIn ? (
+                            // Show these options when logged in
                             <>
                                 <Link to="/account" className='sidebar-link'>
-                                    <FaUser /> Account
+                                    <FaUser /> My Account
+                                </Link>
+                                <Link to="/orders" className='sidebar-link'>
+                                    <FaShoppingBag /> My Orders
                                 </Link>
                                 <Link to="/wallet" className='sidebar-link'>
                                     <FaWallet /> Wallet
                                 </Link>
-                                <Link to="/orders" className='sidebar-link'>
-                                    <FaShoppingBag /> Orders
+                                <Link to="/feedback" className='sidebar-link'>
+                                    <FaComment /> Feedback
                                 </Link>
-                                
-                                {/* Crypto Payment Options */}
-                                <div className='mt-4 border-t pt-4'>
-                                    <h3 className='text-sm font-semibold mb-2'>Payment Methods</h3>
-                                    <div className='flex flex-col gap-2 text-sm'>
-                                        <div className='flex items-center gap-2'>
-                                            <FaBitcoin className='text-orange-500' /> Bitcoin
-                                        </div>
-                                        <div className='flex items-center gap-2'>
-                                            <FaEthereum className='text-blue-500' /> Ethereum
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <button 
-                                    onClick={handleLogout}
-                                    className='mt-auto flex items-center gap-2 text-red-500 hover:text-red-600'
+                                    onClick={handleLogoutClick}
+                                    className='sidebar-link text-red-500 hover:bg-red-50 mt-auto'
                                 >
                                     <BiLogOut /> Logout
                                 </button>
                             </>
                         ) : (
-                            <div className='flex flex-col gap-2'>
+                            // Show these options when logged out
+                            <>
                                 <button 
-                                    onClick={handleLogin}
+                                    onClick={handleLoginClick}
                                     className='sidebar-link bg-blue-500 text-white hover:bg-blue-600'
                                 >
                                     <BiLogIn /> Login
@@ -129,7 +104,10 @@ const Navbar = () => {
                                 <Link to="/signup" className='sidebar-link border border-blue-500 text-blue-500 hover:bg-blue-50'>
                                     Sign Up
                                 </Link>
-                            </div>
+                                <Link to="/feedback" className='sidebar-link'>
+                                    <FaComment /> Feedback
+                                </Link>
+                            </>
                         )}
                     </div>
                 </div>
